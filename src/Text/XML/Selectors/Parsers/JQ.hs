@@ -124,6 +124,7 @@ qualifier = choice
   , nthChild
   , nthLastChild
   , having
+  , not_
   ]
 
 classAttrib :: (Stream s, Token s ~ Char) => Parsec Text s Selector
@@ -187,5 +188,5 @@ positiveInt = read <$> some digitChar
 having :: (IsString (Tokens s), Stream s, Token s ~ Char) => Parsec Text s Selector
 having = try (string ":has") *> space *> char '(' *> (Having <$> item) <* char ')'
 
-not :: (IsString (Tokens s), Stream s, Token s ~ Char) => Parsec Text s Selector
-not = try (string ":not") *> space *> char '(' *> (Not <$> item) <* char ')'
+not_ :: (IsString (Tokens s), Stream s, Token s ~ Char) => Parsec Text s Selector
+not_ = try (string ":not") *> space *> char '(' *> (Not <$> item) <* char ')'
