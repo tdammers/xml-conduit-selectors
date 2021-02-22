@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<example>
+    <clients>
+        <client id="anna" class="item regular-item">
+            <name>Anna Smith</name>
+            <phone type="mobile">555 123 4567</phone>
+        </client>
+        <client id="john" class="item regular-item">
+            <name>John Doe</name>
+            <phone type="mobile">555 111 1111</phone>
+            <phone type="home">555 999 9999</phone>
+        </client>
+        <client id="jane" class="item disabled-item">
+            <name>Jane Doe</name>
+            <phone type="mobile">555 222 2222</phone>
+            <phone type="home">555 888 8888</phone>
+        </client>
+    </clients>
+</example>
