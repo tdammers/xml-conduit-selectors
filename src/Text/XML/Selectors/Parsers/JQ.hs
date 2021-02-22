@@ -2,10 +2,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
 module Text.XML.Selectors.Parsers.JQ
-( jqFile
+( jq
+, jqFile
 , jqFile'
-, jqStr
-, jqStr'
+, jqString
+, jqText
+, jqString'
+, jqText'
 , errorBundlePretty
 )
 where
@@ -20,30 +23,32 @@ import Text.XML (Name)
 import Data.String (IsString, fromString)
 import Data.Char (isAlphaNum, isDigit)
 
-_jq :: (IsString (Tokens s), Stream s, Token s ~ Char)
+jq :: (IsString (Tokens s), Stream s, Token s ~ Char)
     => String -- ^ Name of source file
     -> s -- ^ Input stream
     -> Either (ParseErrorBundle s Text) Selector
-_jq = parse jqSelector
+jq = parse jqSelector
 
-_jq' :: String -- ^ Name of source file
-     -> String -- ^ Input stream
-     -> Selector
-_jq' fn s = either (error . errorBundlePretty) id $ _jq fn s
+jqString :: String -- ^ Input stream
+         -> Either (ParseErrorBundle String Text) Selector
+jqString = jq "<input>"
 
-jqStr :: (IsString (Tokens s), Stream s, Token s ~ Char)
-      => s -- ^ Input stream
-      -> Either (ParseErrorBundle s Text) Selector
-jqStr = _jq "<input>"
+jqString' :: String -- ^ Input stream
+          -> Selector
+jqString' = either (error . errorBundlePretty) id . jq "<input>"
 
-jqStr' :: String -- ^ Input stream
-       -> Selector
-jqStr' = _jq' "<input>"
+jqText :: Text -- ^ Input stream
+       -> Either (ParseErrorBundle Text Text) Selector
+jqText = jq "<input>"
+
+jqText' :: Text -- ^ Input stream
+        -> Selector
+jqText' = either (error . errorBundlePretty) id . jq "<input>"
 
 jqFile :: FilePath
        -> IO (Either (ParseErrorBundle Text Text) Selector)
 jqFile fn = do
-  _jq fn <$> Text.readFile fn
+  jq fn <$> Text.readFile fn
 
 jqFile' :: FilePath
         -> IO Selector
