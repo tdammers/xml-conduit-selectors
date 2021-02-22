@@ -8,10 +8,11 @@ import qualified Data.Text as Text
 import Control.Applicative
 
 data Selector
-  = Any -- ^ @*@
+  = None
+  | Any -- ^ @*@
   | Append Selector Selector -- ^ @ab@ (both a and b must match)
   | Elem Name -- ^ @div@
-  | ByAttrib AttribSelector -- ^ @a[...]@
+  | Attrib AttribSelector -- ^ @a[...]@
   | Descendant -- ^ @ @ (whitespace)
   | Child -- ^ @>@
   | Sibling -- ^ @~@
@@ -21,10 +22,16 @@ data Selector
   | NthChild Int -- ^ @:nth-child(n)@; @:nth-last-child(-n)@
   | Choice [Selector] -- ^ @a,b,...@
   | Having Selector -- ^ @:has(b)@
+  | Not Selector -- ^ @:not(b)@
   deriving (Show)
 
+selectorAppend :: Selector -> Selector -> Selector
+selectorAppend Any x = x
+selectorAppend x Any = x
+selectorAppend a b = Append a b
+
 instance Semigroup Selector where
-  (<>) = Append
+  (<>) = selectorAppend
 
 instance Monoid Selector where
   mappend = (<>)

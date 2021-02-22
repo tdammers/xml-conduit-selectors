@@ -22,7 +22,7 @@ import Text.XML.Selectors.ToAxis
 tests :: TestTree
 tests =
   testGroup "selectors"
-    [ testGroup "example-tests"
+    [ testGroup "toAxis/match"
       [ testCase "name" $
           testSelector
             (elemNode "root" []
@@ -45,7 +45,7 @@ tests =
               , elemNode "foo" [("ident", "pasta")] [ textNode "mars" ]
               ]
             )
-            (ByAttrib $ AttribIs "id" "blah")
+            (Attrib $ AttribIs "id" "blah")
             [ elemNode "foo" [("id", "blah")] [ textNode "world" ]
             ]
       , testCase "attrib-exists" $
@@ -57,7 +57,7 @@ tests =
               , elemNode "foo" [("ident", "pasta")] [ textNode "mars" ]
               ]
             )
-            (ByAttrib $ AttribExists "id")
+            (Attrib $ AttribExists "id")
             [ elemNode "foo" [("id", "blub")] [ textNode "hello" ]
             , elemNode "foo" [("id", "blah")] [ textNode "world" ]
             , elemNode "foo" [("id", "pizza")] [ textNode "moon" ]
@@ -71,7 +71,7 @@ tests =
               , elemNode "foo" [("ident", "pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribIsNot "id" "pizza"))
+            (Elem "foo" <> Attrib (AttribIsNot "id" "pizza"))
             [ elemNode "foo" [("id", "blub")] [ textNode "hello" ]
             , elemNode "foo" [("id", "blah")] [ textNode "world" ]
             , elemNode "foo" [("ident", "pasta")] [ textNode "mars" ]
@@ -85,7 +85,7 @@ tests =
               , elemNode "foo" [("ident", "pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribStartsWith "id" "bl"))
+            (Elem "foo" <> Attrib (AttribStartsWith "id" "bl"))
             [ elemNode "foo" [("id", "blub")] [ textNode "hello" ]
             , elemNode "foo" [("id", "blah")] [ textNode "world" ]
             ]
@@ -98,7 +98,7 @@ tests =
               , elemNode "foo" [("id", "pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribEndsWith "id" "a"))
+            (Elem "foo" <> Attrib (AttribEndsWith "id" "a"))
             [ elemNode "foo" [("id", "pizza")] [ textNode "moon" ]
             , elemNode "foo" [("id", "pasta")] [ textNode "mars" ]
             ]
@@ -111,7 +111,7 @@ tests =
               , elemNode "foo" [("id", "pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribContains "id" "a"))
+            (Elem "foo" <> Attrib (AttribContains "id" "a"))
             [ elemNode "foo" [("id", "blah")] [ textNode "world" ]
             , elemNode "foo" [("id", "pizza")] [ textNode "moon" ]
             , elemNode "foo" [("id", "pasta")] [ textNode "mars" ]
@@ -125,7 +125,7 @@ tests =
               , elemNode "foo" [("id", "party pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribContainsWord "id" "party"))
+            (Elem "foo" <> Attrib (AttribContainsWord "id" "party"))
             [ elemNode "foo" [("id", "pizza party")] [ textNode "moon" ]
             , elemNode "foo" [("id", "party pasta")] [ textNode "mars" ]
             ]
@@ -138,7 +138,7 @@ tests =
               , elemNode "foo" [("id", "party pasta")] [ textNode "mars" ]
               ]
             )
-            (Elem "foo" <> ByAttrib (AttribContainsPrefix "id" "party"))
+            (Elem "foo" <> Attrib (AttribContainsPrefix "id" "party"))
             [ elemNode "foo" [("id", "party-blah")] [ textNode "world" ]
             , elemNode "foo" [("id", "party")] [ textNode "moon" ]
             ]
@@ -311,8 +311,26 @@ tests =
                   ]
               ]
             )
-            (Elem "foo" <> Having (Descendant <> Elem "bar"))
+            (Elem "foo" <> Having (Elem "bar"))
             [ elemNode "foo" [] [ elemNode "bar" [] [] ]
+            ]
+      , testCase "not" $
+          testSelector
+            (elemNode "root" []
+              [ elemNode "foo" [("id", "1")]
+                  [ elemNode "bar" [] []
+                  ]
+              , elemNode "foo" [("id", "2")] []
+              , elemNode "baz" []
+                  [ elemNode "bar" [] []
+                  ]
+              , elemNode "foo" []
+                  [ elemNode "quux" [] []
+                  ]
+              ]
+            )
+            (Elem "foo" <> Not (Attrib $ AttribExists "id"))
+            [ elemNode "foo" [] [ elemNode "quux" [] [] ]
             ]
       ]
     ]

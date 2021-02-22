@@ -15,13 +15,15 @@ toAxis :: Selector -> Axis
 -- @*@
 toAxis Any =
   (:[])
+toAxis None =
+  const []
 toAxis (Append a b) =
   toAxis a >=> toAxis b
 -- @div@
 toAxis (Elem name) =
   element name
 -- @a[...]@
-toAxis (ByAttrib p) =
+toAxis (Attrib p) =
   checkAttrib p
 -- @a b@
 toAxis Descendant =
@@ -51,7 +53,10 @@ toAxis (Choice xs) =
   \c -> concatMap (\x -> toAxis x c) xs
 -- @a:has(b)@
 toAxis (Having s) =
-  check (toAxis s)
+  check (descendant >=> toAxis s)
+-- @a:not(b)@
+toAxis (Not s) =
+  check (null . toAxis s)
 
 checkAttrib :: AttribSelector -> Axis
 checkAttrib asel = checkElement (checkElementAttribs asel . elementAttributes)
