@@ -5,17 +5,18 @@ cabal-version: >=1.10
 
 name: xml-conduit-selectors
 version: 0.2.0.0
--- synopsis:
--- description:
+synopsis: jQuery-style CSS selectors for xml-conduit
+description: Parse jQuery-style CSS selectors into xml-conduit Axis
 -- bug-reports:
 license: BSD3
 license-file: LICENSE
 author: Tobias Dammers
 maintainer: tdammers@gmail.com
 copyright: Tobias Dammers 2021
--- category:
+category: Data
 build-type: Simple
 extra-source-files: CHANGELOG.md
+                  , README.md
 
 library
   exposed-modules: Text.XML.Selectors

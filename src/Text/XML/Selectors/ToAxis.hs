@@ -1,4 +1,6 @@
 {-#LANGUAGE OverloadedStrings #-}
+
+-- | Description: Convert 'Selector's into 'Axis' functions.
 module Text.XML.Selectors.ToAxis
 where
 
@@ -11,6 +13,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.List (nubBy)
 
+-- | Turn a 'Selector' into an 'Axis'.
 toAxis :: Selector -> Axis
 -- @*@
 toAxis Any =
@@ -58,6 +61,31 @@ toAxis (Having s) =
 toAxis (Not s) =
   check (null . toAxis s)
 
+-- | Directly apply a 'Selector' to a 'Cursor', removing duplicates. Cursors
+-- are considered duplicate iff their focus node /and/ ancestory are the same.
+--
+-- Due to the knot-tying of the 'Cursor' type, this is not perfect: we are not
+-- considering the focus node's position within its parent, so any two nodes
+-- that are exactly identical themselves and share ancestory will be considered
+-- equal. E.g., in the following XML document:
+--
+-- > <root>
+-- >   <parent>
+-- >      <child>Foo</child>
+-- >      <child>Foo</child>
+-- >   </parent>
+-- > </root>
+--
+-- ...the two @\<child/\>@ nodes will be considered equal, even though they are
+-- two distinct nodes in the DOM.
+--
+-- Unlike 'toAxis', the 'match' function prepends an implicit
+-- self-or-descendant 'Axis' to the selector in order to mimic the behavior of
+-- actual CSS selectors.
+match :: Selector -> Cursor -> [Cursor]
+match selector root =
+  removeDoubles . (orSelf descendant >=> toAxis selector) $ root
+
 checkAttrib :: AttribSelector -> Axis
 checkAttrib asel = checkElement (checkElementAttribs asel . elementAttributes)
 
@@ -96,10 +124,6 @@ checkElementAttribs (AttribContainsPrefix n v) attrs =
   case Map.lookup n attrs of
     Just t -> t == v || (v <> "-") `Text.isPrefixOf` t
     Nothing -> False
-
-match :: Selector -> Cursor -> [Cursor]
-match selector root =
-  removeDoubles . (orSelf descendant >=> toAxis selector) $ root
 
 removeDoubles :: [Cursor] -> [Cursor]
 removeDoubles = nubBy isSameCursor
